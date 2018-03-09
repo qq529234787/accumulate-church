@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wme.web.persistence.mysql.ChurchPeopleMapper">
+
+    <sql id="baseField">
+      name,status,mobile,gender,birthday,sort,head_portrait,remark,parish_id,age_group,created,modified
+    </sql>
+    <sql id="allFieldWithId">
+      id,<include refid="baseField"/>
+    </sql>
+
+    <parameterMap id="ChurchPeopleQuery" type="com.wme.web.query.ChurchPeopleQuery"/>
+    <parameterMap id="ChurchPeople" type="com.wme.web.entity.ChurchPeople"/>
+
+    <resultMap id="resultMap" type="com.wme.web.entity.ChurchPeople">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="status" property="status" />
+        <result column="mobile" property="mobile" />
+        <result column="gender" property="gender" />
+        <result column="birthday" property="birthday" />
+        <result column="sort" property="sort" />
+        <result column="head_portrait" property="headPortrait" />
+        <result column="remark" property="remark" />
+        <result column="parish_id" property="parishId" />
+        <result column="age_group" property="ageGroup" />
+        <result column="created" property="created" />
+        <result column="modified" property="modified" />
+    </resultMap>
+
+    <sql id="queryConditions">
+        <where>
+            <if test="status!=null">
+                status=#{status}
+            </if>
+            <if test="name!=null and name!='' ">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="parishId!=null and parishId>0 ">
+                AND parish_id=#{parishId}
+            </if>
+            <if test="ageGroup!=null and ageGroup>=0 ">
+                AND age_group=#{ageGroup}
+            </if>
+        </where>
+    </sql>
+
+    <select id="count" parameterMap="ChurchPeopleQuery" resultType="int">
+        select count(id)
+        from church_people
+        <include refid="queryConditions"/>
+    </select>
+
+    <select id="pageList" parameterMap="ChurchPeopleQuery" resultMap="resultMap">
+        select <include refid="allFieldWithId"/>
+        from church_people
+        <include refid="queryConditions"/>
+        order by sort
+        <include refid="base.paginationLimit"/>
+    </select>
+
+    <select id="get" parameterType="java.lang.Long" resultMap="resultMap">
+        select <include refid="allFieldWithId"/>
+        from church_people
+        where id = #{id}
+    </select>
+
+    <update id="update" parameterMap="ChurchPeople">
+        update church_people
+        <set>
+            <if test="status!=null">
+                status=#{status},
+            </if>
+            <if test="name!=null and name!='' ">
+                name=#{name},
+            </if>
+            <if test="mobile!=null and mobile!='' ">
+                mobile=#{mobile},
+            </if>
+            <if test="gender!=null and gender!='' ">
+                gender=#{gender},
+            </if>
+            <if test="birthday!=null ">
+                birthday=#{birthday},
+            </if>
+            <if test="sort!=null and sort>0 ">
+                sort=#{sort},
+            </if>
+            <if test="headPortrait!=null ">
+                head_portrait=#{headPortrait},
+            </if>
+            <if test="remark!=null ">
+                remark=#{remark},
+            </if>
+            <if test="parishId!=null and parishId>0 ">
+                parish_id=#{parishId},
+            </if>
+            <if test="ageGroup!=null and ageGroup>0 ">
+                age_group=#{ageGroup},
+            </if>
+        </set>
+         where id=#{id}
+    </update>
+
+    <insert id="insert" parameterMap="ChurchPeople">
+        insert into church_people(
+          name,status,mobile,gender,birthday,sort,head_portrait,remark,parish_id,age_group
+        )
+        values(
+          #{name},#{status},#{mobile},#{gender},#{birthday},ifnull(#{sort},0),#{headPortrait},#{remark},ifnull(#{parishId},0),ifnull(#{ageGroup},0)
+        )
+    </insert>
+
+</mapper>

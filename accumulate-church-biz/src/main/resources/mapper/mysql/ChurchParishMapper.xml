@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wme.web.persistence.mysql.ChurchParishMapper">
+
+    <sql id="baseField">
+      status,name,address,remark,created,modified
+    </sql>
+    <sql id="allFieldWithId">
+      id,<include refid="baseField"/>
+    </sql>
+
+    <parameterMap id="ChurchParishQuery" type="com.wme.web.query.ChurchParishQuery"/>
+
+    <resultMap id="resultMap" type="com.wme.web.entity.ChurchParish">
+        <id column="id" property="id" />
+        <result column="status" property="status" />
+        <result column="name" property="name" />
+        <result column="address" property="address" />
+        <result column="remark" property="remark" />
+        <result column="created" property="created" />
+        <result column="modified" property="modified" />
+    </resultMap>
+
+    <sql id="queryConditions">
+        <where>
+            <if test="status!=null">
+                status=#{status}
+            </if>
+            <if test="name!=null and name!='' ">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="address!=null and address!='' ">
+                AND address like CONCAT('%',#{address},'%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="get" parameterType="java.lang.Long" resultMap="resultMap">
+        select <include refid="allFieldWithId"/>
+        from church_parish
+        where id = #{id}
+    </select>
+
+    <select id="count" parameterMap="ChurchParishQuery" resultType="int">
+        select count(id)
+        from church_parish
+        <include refid="queryConditions"/>
+    </select>
+
+    <select id="pageList" parameterMap="ChurchParishQuery" resultMap="resultMap">
+        select <include refid="allFieldWithId"/>
+        from church_parish
+        <include refid="queryConditions"/>
+        order by id
+        <include refid="base.paginationLimit"/>
+    </select>
+
+
+</mapper>

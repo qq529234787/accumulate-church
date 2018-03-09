@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wme.web.persistence.mysql.ChurchParishLessonMapper">
+
+        <sql id="baseField">
+                status,start,end,worship_date,parish_id,teacher,created,modified
+        </sql>
+        <sql id="allFieldWithId">
+                id,<include refid="baseField"/>
+        </sql>
+
+        <parameterMap id="ChurchParishLessonQuery" type="com.wme.web.query.ChurchParishLessonQuery"/>
+        <parameterMap id="ChurchParishLesson" type="com.wme.web.entity.ChurchParishLesson"/>
+
+        <resultMap id="resultMap" type="com.wme.web.entity.ChurchParishLesson">
+                <id column="id" property="id" />
+                <result column="status" property="status" />
+                <result column="start" property="start" />
+                <result column="end" property="end" />
+                <result column="worship_date" property="worshipDate" />
+                <result column="parish_id" property="parishId" />
+                <result column="teacher" property="teacher" />
+                <result column="created" property="created" />
+                <result column="modified" property="modified" />
+        </resultMap>
+
+        <sql id="queryConditions">
+                <where>
+                        <if test="status!=null">
+                          status=#{status}
+                        </if>
+                        <if test="parishId!=null">
+                          AND parish_id=#{parishId}
+                        </if>
+                        <if test="worshipDate!=null">
+                          AND worship_date=#{worshipDate}
+                        </if>
+                        <if test="teacher!=null and teacher != ''">
+                          AND teacher=#{teacher}
+                        </if>
+                </where>
+        </sql>
+
+        <select id="count" parameterMap="ChurchParishLessonQuery" resultType="int">
+                select count(id)
+                from church_parish_lesson
+                <include refid="queryConditions"/>
+        </select>
+
+        <select id="pageList" parameterMap="ChurchParishLessonQuery" resultMap="resultMap">
+                select <include refid="allFieldWithId"/>
+                from church_parish_lesson
+                <include refid="queryConditions"/>
+                order by worship_date desc
+                <include refid="base.paginationLimit"/>
+        </select>
+
+        <select id="get" parameterType="java.lang.Long" resultMap="resultMap">
+                select <include refid="allFieldWithId"/>
+                from church_parish_lesson
+                where id = #{id}
+        </select>
+
+        <insert id="insert" parameterMap="ChurchParishLesson">
+                insert into church_parish_lesson(
+                  status,worship_date,parish_id,teacher
+                )
+                values(
+                  #{status},#{worshipDate},ifnull(#{parishId},0),ifnull(#{teacher},'')
+                )
+        </insert>
+
+        <update id="update" parameterMap="ChurchParishLesson">
+                update church_parish_lesson
+                <set>
+                        <if test="status!=null">
+                                status=#{status},
+                        </if>
+                        <if test="worshipDate!=null ">
+                                worship_date=#{worshipDate},
+                        </if>
+                        <if test="start!=null ">
+                                start=#{start},
+                        </if>
+                        <if test="end!=null ">
+                                end=#{end},
+                        </if>
+                        <if test="parishId!=null and parishId>0 ">
+                                parish_id=#{parishId},
+                        </if>
+                        <if test="teacher!=null and teacher!='' ">
+                                teacher=#{teacher},
+                        </if>
+                </set>
+                where id=#{id}
+        </update>
+
+</mapper>
